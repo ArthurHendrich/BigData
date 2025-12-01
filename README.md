@@ -1,84 +1,130 @@
-# Pipeline de Big Data - Análise de E-commerce Olist
+## 1. Introdução
 
-## Descrição do Projeto
+O avanço acelerado do comércio eletrônico tem ampliado significativamente o volume, a variedade e a velocidade com que dados são gerados e armazenados pelas plataformas digitais. Transações, registros de navegação, características de produtos, comportamentos de compra e informações de clientes constituem um ecossistema informacional complexo, cuja exploração adequada representa um diferencial competitivo essencial para empresas do setor. Entretanto, grande parte desses dados encontra-se distribuída em múltiplas fontes, heterogênea em formato e qualidade, o que dificulta sua utilização direta em processos analíticos e modelos de suporte à decisão.
 
-Este projeto implementa um pipeline completo de Big Data para análise de dados de e-commerce da plataforma brasileira **Olist**. O objetivo é transformar dados brutos de clientes e produtos em insights estratégicos que possam auxiliar na tomada de decisões de negócio.
+Nesse contexto, a construção de pipelines de Big Data se torna uma estratégia fundamental para viabilizar o tratamento sistemático desses conjuntos massivos de informações. Um pipeline bem estruturado permite a coleta, organização, padronização e enriquecimento dos dados, assegurando governança, rastreabilidade e preparação adequada para análises avançadas. A necessidade de arquiteturas eficientes — capazes de lidar com operações de ingestão, transformação, integração e disponibilização de dados — é particularmente relevante quando se considera a aplicação de sistemas de recomendação, que dependem da qualidade e consistência dos dados para gerar valor.
 
-O projeto utiliza a **Arquitetura Medallion** (Bronze, Silver, Gold) para organizar o fluxo de dados, garantindo qualidade, governança e preparação adequada dos dados para análises avançadas.
+Este projeto aborda esse desafio ao desenvolver um pipeline completo de Big Data aplicado ao dataset público brasileiro **Olist**, amplamente utilizado em estudos de e-commerce por sua riqueza de informações sobre clientes, pedidos, produtos e itens comprados. A proposta consiste em transformar dados brutos em insights estruturados, empregando a **Arquitetura Medallion** (Bronze, Silver e Gold) como referência para organizar o fluxo de processamento. O problema central investigado reside na necessidade de integrar diferentes tabelas, corrigir inconsistências, padronizar atributos e gerar métricas capazes de apoiar análises sobre comportamento de consumidores, categorias de produtos e potencial aplicação futura em sistemas de recomendação.
 
-## Problema a Resolver
+Assim, a introdução deste trabalho fundamenta a relevância do desenvolvimento de pipelines robustos para ambientes de e-commerce e estabelece o ponto de partida para a metodologia empregada, que busca transformar dados dispersos e despadronizados em informações estratégicas e analiticamente úteis.
 
-Empresas de e-commerce lidam com grandes volumes de dados diariamente, mas muitas vezes esses dados estão dispersos, desorganizados e não são aproveitados adequadamente. O desafio é:
+---
 
-- **Integrar** dados de múltiplas fontes (clientes, produtos)
-- **Limpar e transformar** dados brutos em informações confiáveis
-- **Gerar insights** acionáveis sobre vendas, segmentação de clientes e comportamento de mercado
-- **Otimizar** processos de negócio através de análise de dados
+## **2. Motivação**
 
-## Fonte dos Dados
+A motivação para o desenvolvimento deste pipeline fundamenta-se em três elementos principais:  
+(1) A relevância de sistemas de recomendação para aumentar conversões, retenção e personalização no E-commerce;  
+(2) A riqueza e diversidade do dataset da Olist, que fornece um ambiente realista e variado para estudos acadêmicos;  
+(3) A necessidade de aplicar práticas profissionais de Engenharia de Dados, utilizando camadas estruturadas (Bronze, Silver e Gold) que refletem arquiteturas adotadas em ambientes corporativos. Dessa forma, o projeto une relevância prática, aplicabilidade acadêmica e a oportunidade de consolidar técnicas essenciais do processamento de dados em larga escala.
 
-**Dataset**: Brazilian E-Commerce Public Dataset by Olist  
-**Fonte**: [Kaggle - Olist E-Commerce](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+---
 
-**Datasets utilizados**:
+## **3. Objetivo do Projeto**
 
-- `olist_customers_dataset.csv`
-- `olist_products_dataset.csv`
+O objetivo geral é construir um pipeline de Big Data em modo batch, capaz de processar, transformar e consolidar dados de E-commerce em estruturas analíticas adequadas para estudos exploratórios e geração de métricas de recomendação.
 
-### Pipeline Implementado
+### **Objetivos específicos**
 
-1. **Ingestão**: Download de datasets do Kaggle → Upload no Google Colab
-2. **Armazenamento Bronze**: CSV bruto (formato original)
-3. **Transformação Silver**: Limpeza, normalização, enriquecimento
-4. **Armazenamento Gold**: Dados agregados prontos para visualização
-5. **Análise**: Notebooks Jupyter com visualizações e insights
+- Organizar os dados brutos em uma camada Bronze.
+- Aplicar transformações, limpezas e enriquecimentos na camada Silver.
+- Gerar métricas de negócio e tabelas de recomendação na camada Gold.
+- Criar visualizações que revelem padrões relevantes para análise.
+- Estruturar o repositório e documentação conforme diretrizes da disciplina.
 
-## Ferramentas Utilizadas
+---
 
-- **Python 3.x** - Linguagem principal
-- **Pandas** - Manipulação e análise de dados
-- **NumPy** - Operações numéricas
-- **Matplotlib/Seaborn** - Visualização de dados
-- **Plotly** - Gráficos interativos
-- **Google Colab** - Ambiente de desenvolvimento
-- **GitHub** - Versionamento de código
-- **Jupyter Notebook** - Documentação e análise
+## **4. Metodologia (Pipeline de Dados)**
 
-## Equipe e Divisão de Tarefas
+A metodologia segue a arquitetura em camadas do tipo **Bronze → Silver → Gold**, amplamente utilizada em Engenharia de Dados. O pipeline foi construído em Python utilizando as bibliotecas `pandas`, `numpy`, `pyarrow`, `matplotlib` e `seaborn`. A organização do repositório inclui pastas específicas para código (`/src`), notebooks (`/notebooks`) e dados processados (`/dados`).
 
-### Integrantes
+### **4.1 Fontes de Dados**
 
-- **Arthur Henrich** - aham@cesar.school
-- **Henrique Cordeiro** - hcp@cesar.school
-- **Luiza Omena** - los2@cesar.school
+As fontes utilizadas pertencem ao _Brazilian E-Commerce Public Dataset by Olist_, contendo tabelas como:
 
-## Como Executar
+- **Customers** — informações de cadastro e localização;
+- **Orders** — status, datas e eventos dos pedidos;
+- **Order Items** — produtos adquiridos e valores;
+- **Products** — catálogo e atributos físicos.  
+  Os arquivos originais são estruturados em formato CSV e armazenados na camada Bronze.
 
-### Pré-requisitos
+### **4.2 Ingestão**
 
-- Python 3.7+
-- Google Colab (recomendado) ou Jupyter Notebook local
+A ingestão ocorre em modo batch utilizando `pandas.read_csv`. Nesta etapa, os dados são importados sem alterações e armazenados em `/dados/bronze/`.  
+A ingestão também envolve validação básica de formatos e dimensões das tabelas.
 
-### Passo a Passo
+### **4.3 Transformação**
 
-1. **Clone o repositório**:
+A transformação, executada na camada Silver, inclui:
 
-```bash
-git clone https://github.com/ArthurHendrich/BigData.git
-cd BigData
-```
+- limpeza de nulos;
+- remoção de duplicados;
+- padronização de texto;
+- conversão de datas;
+- criação de colunas derivadas (densidade, volume, região do cliente etc.).
 
-2. **Instale as dependências**:
+Os arquivos resultantes são salvos em CSV e Parquet para maior eficiência e normalização.
 
-```bash
-pip install pandas numpy matplotlib seaborn plotly scikit-learn
-```
+### **4.4 Carregamento**
 
-3. **Execute o notebook**:
+Os dados transformados são estruturados e consolidados para composição da camada Gold, garantindo padronização e consistência. O carregamento define o formato final dos arquivos disponibilizados para análise.
 
-- Abra `codigo/preProcessamento.ipynb` no Google Colab ou Jupyter
-- Execute as células sequencialmente
-- Os dados serão processados através das camadas Bronze → Silver → Gold
+### **4.5 Destino (Camada Gold)**
 
-4. **link do colab**:
-   https://colab.research.google.com/drive/1Q3HkqvHgv-x1Mmxw2PgC6ZlrqnzdtSDd?usp=sharing
+A camada Gold reúne métricas avançadas de negócio e estruturações direcionadas a sistemas de recomendação, incluindo:
+
+- análise de categorias;
+- distribuição de clientes por região;
+- métricas de popularidade de produtos;
+- histórico de compras por categoria;
+- indicadores consolidados para insights estratégicos.
+
+Os resultados são armazenados em `/dados/gold/` em arquivos CSV e Parquet.
+
+---
+
+## **5. Resultados e Visualizações**
+
+As análises e gráficos foram desenvolvidos no notebook `pipeline_olist.ipynb`, localizado em `/notebooks`. Entre os principais resultados observados estão:
+
+- concentração de clientes na região Sudeste;
+- categorias com maior número de produtos e maior volume de vendas;
+- identificação de produtos mais populares por receita e frequência;
+- padrões temporais recorrentes nos horários de compra;
+- distribuição de preços e atributos físicos dos produtos.
+
+As visualizações geradas incluem:
+
+- gráficos de barras, histogramas e boxplots;
+- heatmaps de correlação;
+- análises de tendência e distribuição;
+- tabelas de insights extraídos da camada Gold.
+
+Esses resultados oferecem base sólida para aplicações futuras em modelos de filtragem colaborativa ou recomendação baseada em conteúdo.
+
+---
+
+## **6. Conclusões**
+
+O pipeline desenvolvido cumpre os requisitos propostos, demonstrando a viabilidade de estruturar dados em múltiplas camadas e extrair valor analítico de um ambiente realista de E-commerce. A metodologia aplicada evidenciou a importância de processos bem definidos para garantir qualidade e rastreabilidade dos dados.
+
+### **Principais conclusões**
+
+- A arquitetura Bronze–Silver–Gold favorece clareza e organização.
+- O dataset, apesar de heterogêneo, oferece amplo potencial analítico.
+- As métricas geradas fornecem insumos para sistemas de recomendação.
+
+### **Dificuldades encontradas**
+
+- alta fragmentação de categorias de produtos;
+- integração entre múltiplas tabelas com chaves distintas;
+- presença de registros incompletos ou inconsistentes.
+
+### **Trabalhos futuros**
+
+- implementação de recomendadores colaborativos;
+- inclusão de ingestão por streaming;
+- uso de dashboards interativos (Dash, PowerBI);
+- enriquecimento dos dados com mapas geográficos externos;
+- aplicação de técnicas de machine learning para clusterização de clientes.
+
+---

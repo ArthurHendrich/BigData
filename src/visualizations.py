@@ -110,6 +110,7 @@ def generate_all_visualizations(
         plt.title("Número de pedidos por ano")
         plt.xlabel("Ano")
         plt.ylabel("Quantidade de pedidos")
+        plt.xticks(orders_by_year.index.astype(int))
         plt.tight_layout()
         path = output_dir / "orders_by_year.png"
         plt.savefig(path)

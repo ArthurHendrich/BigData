@@ -153,9 +153,7 @@ coverage.xml
 # 5. DADOS - ARQUIVOS PROCESSADOS/TEMPORÁRIOS
 # ============================================
 
-# Arquivos Parquet (formato binário, pode ser regenerado)
-*_silver.parquet
-gold_*.parquet
+
 
 # NOTA: Os CSVs das camadas Silver e Gold são versionados
 # para demonstrar a arquitetura Medallion na AV2
@@ -271,22 +269,6 @@ secrets.yml
 *.html
 !docs/*.html
 
-# ============================================
-# ARQUIVOS QUE DEVEM SER VERSIONADOS:
-# ============================================
-# ✅ /dados/*.csv (Bronze - dados raw)
-# ✅ /dados/README.md
-# ✅ /codigo/*.ipynb (notebooks principais)
-# ✅ /codigo/*.py (scripts)
-# ✅ /documentacao/*.md
-# ✅ /documentacao/*.pdf (documentos de referência)
-# ✅ README.md
-# ✅ requirements.txt (se houver)
-# ✅ .gitignore (este arquivo)
-
-# ============================================
-# CONFIGURAÇÕES ESPECÍFICAS DO PROJETO
-# ============================================
 
 # Ignorar notebook de testes (se houver)
 **/sandbox.ipynb

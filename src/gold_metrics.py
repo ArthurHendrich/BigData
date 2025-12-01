@@ -157,9 +157,6 @@ def build_gold_tables(
     )
     top_insights.to_csv(config.GOLD_DIR / "gold_top_insights.csv", index=False)
 
-    # ========== ANALISES ADICIONAIS ==========
-
-    # 1. Receita por categoria
     if not product_recommendation_stats.empty:
         revenue_by_category = (
             product_recommendation_stats.groupby("product_category_name")
@@ -174,13 +171,11 @@ def build_gold_tables(
         revenue_by_category.to_csv(config.GOLD_DIR / "gold_revenue_by_category.csv")
         print("  - gold_revenue_by_category.csv")
 
-    # 2. Pedidos por mes (analise temporal) - corte em 2018-08
     if "order_purchase_timestamp" in df_orders.columns:
         df_orders_temp = df_orders.copy()
         df_orders_temp["order_purchase_timestamp"] = pd.to_datetime(
             df_orders_temp["order_purchase_timestamp"]
         )
-        # Filtrar ate 2018-08 (dados incompletos apos essa data)
         df_orders_temp = df_orders_temp[
             df_orders_temp["order_purchase_timestamp"] < "2018-09-01"
         ]
@@ -194,7 +189,6 @@ def build_gold_tables(
         orders_by_month.to_csv(config.GOLD_DIR / "gold_orders_by_month.csv", index=False)
         print("  - gold_orders_by_month.csv")
 
-    # 4. Status dos pedidos
     if "order_status" in df_orders.columns:
         order_status_dist = (
             df_orders["order_status"]
@@ -205,7 +199,6 @@ def build_gold_tables(
         order_status_dist.to_csv(config.GOLD_DIR / "gold_order_status_distribution.csv", index=False)
         print("  - gold_order_status_distribution.csv")
 
-    # 5. Ticket medio por regiao
     if not product_recommendation_stats.empty and "customer_region" in df_customers.columns:
         fact_with_region = (
             df_order_items[["order_id", "price"]]

@@ -135,15 +135,12 @@ def generate_all_visualizations(
         plt.close()
         figure_paths["products_numeric_corr"] = path
 
-    # ========== VISUALIZACOES ADICIONAIS ==========
 
-    # 6. Pedidos por mes (evolucao temporal) - corte em 2018-08
     if "order_purchase_timestamp" in df_orders.columns:
         df_orders_temp = df_orders.copy()
         df_orders_temp["order_purchase_timestamp"] = pd.to_datetime(
             df_orders_temp["order_purchase_timestamp"]
         )
-        # Filtrar ate 2018-08 (dados incompletos apos essa data)
         df_orders_temp = df_orders_temp[
             df_orders_temp["order_purchase_timestamp"] < "2018-09-01"
         ]
@@ -163,7 +160,6 @@ def generate_all_visualizations(
         plt.close()
         figure_paths["orders_by_month"] = path
 
-    # 7. Status dos pedidos (grafico de barras horizontal - mais legivel)
     if "order_status" in df_orders.columns:
         plt.figure(figsize=(10, 6))
         status_counts = df_orders["order_status"].value_counts()
@@ -172,7 +168,6 @@ def generate_all_visualizations(
         plt.title("Distribuicao de status dos pedidos")
         plt.xlabel("Quantidade de pedidos")
         plt.ylabel("Status")
-        # Adicionar valores nas barras
         for bar, value in zip(bars, status_counts.values):
             percentage = (value / status_counts.sum()) * 100
             plt.text(value + 500, bar.get_y() + bar.get_height()/2, 
@@ -183,7 +178,6 @@ def generate_all_visualizations(
         plt.close()
         figure_paths["order_status_distribution"] = path
 
-    # 9. Receita por categoria (top 10)
     if not product_reco_stats.empty:
         plt.figure(figsize=(10, 6))
         revenue_by_cat = (
@@ -203,7 +197,6 @@ def generate_all_visualizations(
         plt.close()
         figure_paths["top10_categories_by_revenue"] = path
 
-    # 10. Distribuicao de precos dos produtos
     if "price" in df_order_items.columns:
         plt.figure(figsize=(10, 5))
         prices = df_order_items["price"]

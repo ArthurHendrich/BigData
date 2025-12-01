@@ -82,20 +82,23 @@ def generate_all_visualizations(
 
 
     if not product_reco_stats.empty:
+        # Grafico: Top 10 categorias por vendas (mais informativo que IDs)
         plt.figure(figsize=(10, 6))
-        top10_reco = (
-            product_reco_stats.sort_values("total_orders", ascending=False)
+        category_sales = (
+            product_reco_stats.groupby("product_category_name")
+            .agg(total_orders=("total_orders", "sum"))
+            .sort_values("total_orders", ascending=False)
             .head(10)
             .iloc[::-1]
         )
-        plt.barh(top10_reco["product_id"], top10_reco["total_orders"])
-        plt.title("Top 10 produtos mais vendidos (por número de pedidos)")
+        plt.barh(category_sales.index, category_sales["total_orders"])
+        plt.title("Top 10 categorias mais vendidas (por numero de pedidos)")
         plt.xlabel("Total de pedidos (delivered)")
         plt.tight_layout()
-        path = output_dir / "top10_products_by_orders.png"
+        path = output_dir / "top10_categories_by_orders.png"
         plt.savefig(path)
         plt.close()
-        figure_paths["top10_products_by_orders"] = path
+        figure_paths["top10_categories_by_orders"] = path
 
     if "order_purchase_timestamp" in df_orders.columns:
         df_orders_copy = df_orders.copy()
@@ -124,15 +127,112 @@ def generate_all_visualizations(
     ]
     if numeric_cols:
         plt.figure(figsize=(8, 6))
-        sns.heatmap(df_products[numeric_cols].corr(), annot=True, fmt=".2f")
-        plt.title("Correlação entre atributos físicos dos produtos")
+        sns.heatmap(df_products[numeric_cols].corr(), annot=True, fmt=".2f", cmap="coolwarm")
+        plt.title("Correlacao entre atributos fisicos dos produtos")
         plt.tight_layout()
         path = output_dir / "products_numeric_corr.png"
         plt.savefig(path)
         plt.close()
         figure_paths["products_numeric_corr"] = path
 
-    print("\nVisualizações salvas em:", output_dir)
+    # ========== VISUALIZACOES ADICIONAIS ==========
+
+    # 6. Distribuicao de clientes por estado (top 10)
+    if "customer_state" in df_customers.columns:
+        plt.figure(figsize=(10, 6))
+        state_counts = df_customers["customer_state"].value_counts().head(10)
+        colors = sns.color_palette("viridis", len(state_counts))
+        plt.bar(state_counts.index, state_counts.values, color=colors)
+        plt.title("Top 10 estados por numero de clientes")
+        plt.xlabel("Estado")
+        plt.ylabel("Numero de clientes")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        path = output_dir / "top10_states_by_customers.png"
+        plt.savefig(path)
+        plt.close()
+        figure_paths["top10_states_by_customers"] = path
+
+    # 7. Pedidos por mes (evolucao temporal)
+    if "order_purchase_timestamp" in df_orders.columns:
+        df_orders_temp = df_orders.copy()
+        df_orders_temp["order_purchase_timestamp"] = pd.to_datetime(
+            df_orders_temp["order_purchase_timestamp"]
+        )
+        df_orders_temp["year_month"] = df_orders_temp["order_purchase_timestamp"].dt.to_period("M")
+        orders_by_month = df_orders_temp.groupby("year_month").size()
+
+        plt.figure(figsize=(12, 5))
+        plt.plot(orders_by_month.index.astype(str), orders_by_month.values, marker="o", linewidth=2)
+        plt.title("Evolucao mensal de pedidos")
+        plt.xlabel("Mes/Ano")
+        plt.ylabel("Quantidade de pedidos")
+        plt.xticks(rotation=45)
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        path = output_dir / "orders_by_month.png"
+        plt.savefig(path)
+        plt.close()
+        figure_paths["orders_by_month"] = path
+
+    # 8. Status dos pedidos (pie chart)
+    if "order_status" in df_orders.columns:
+        plt.figure(figsize=(8, 8))
+        status_counts = df_orders["order_status"].value_counts()
+        colors = sns.color_palette("Set2", len(status_counts))
+        plt.pie(
+            status_counts.values,
+            labels=status_counts.index,
+            autopct="%1.1f%%",
+            colors=colors,
+            startangle=90,
+        )
+        plt.title("Distribuicao de status dos pedidos")
+        plt.tight_layout()
+        path = output_dir / "order_status_distribution.png"
+        plt.savefig(path)
+        plt.close()
+        figure_paths["order_status_distribution"] = path
+
+    # 9. Receita por categoria (top 10)
+    if not product_reco_stats.empty:
+        plt.figure(figsize=(10, 6))
+        revenue_by_cat = (
+            product_reco_stats.groupby("product_category_name")["total_revenue"]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .iloc[::-1]
+        )
+        colors = sns.color_palette("rocket", len(revenue_by_cat))
+        plt.barh(revenue_by_cat.index, revenue_by_cat.values, color=colors)
+        plt.title("Top 10 categorias por receita total (R$)")
+        plt.xlabel("Receita total (R$)")
+        plt.tight_layout()
+        path = output_dir / "top10_categories_by_revenue.png"
+        plt.savefig(path)
+        plt.close()
+        figure_paths["top10_categories_by_revenue"] = path
+
+    # 10. Distribuicao de precos dos produtos
+    if "price" in df_order_items.columns:
+        plt.figure(figsize=(10, 5))
+        prices = df_order_items["price"]
+        prices_filtered = prices[prices <= prices.quantile(0.95)]  # Remove outliers
+        plt.hist(prices_filtered, bins=50, edgecolor="black", alpha=0.7, color="steelblue")
+        plt.title("Distribuicao de precos dos produtos (ate percentil 95)")
+        plt.xlabel("Preco (R$)")
+        plt.ylabel("Frequencia")
+        plt.axvline(prices_filtered.mean(), color="red", linestyle="--", label=f"Media: R${prices_filtered.mean():.2f}")
+        plt.axvline(prices_filtered.median(), color="green", linestyle="--", label=f"Mediana: R${prices_filtered.median():.2f}")
+        plt.legend()
+        plt.tight_layout()
+        path = output_dir / "price_distribution.png"
+        plt.savefig(path)
+        plt.close()
+        figure_paths["price_distribution"] = path
+
+    print("\nVisualizacoes salvas em:", output_dir)
     for name, path in figure_paths.items():
         print(f"  - {name}: {path}")
 

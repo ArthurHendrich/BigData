@@ -157,6 +157,81 @@ def build_gold_tables(
     )
     top_insights.to_csv(config.GOLD_DIR / "gold_top_insights.csv", index=False)
 
-    print("Arquivos Gold gerados em:", config.GOLD_DIR)
+    # ========== ANALISES ADICIONAIS ==========
+
+    # 1. Receita por categoria
+    if not product_recommendation_stats.empty:
+        revenue_by_category = (
+            product_recommendation_stats.groupby("product_category_name")
+            .agg(
+                total_revenue=("total_revenue", "sum"),
+                total_orders=("total_orders", "sum"),
+                avg_ticket=("avg_price", "mean"),
+            )
+            .round(2)
+            .sort_values("total_revenue", ascending=False)
+        )
+        revenue_by_category.to_csv(config.GOLD_DIR / "gold_revenue_by_category.csv")
+        print("  - gold_revenue_by_category.csv")
+
+    # 2. Analise por estado
+    if "customer_state" in df_customers.columns:
+        customers_by_state = (
+            df_customers["customer_state"]
+            .value_counts()
+            .reset_index()
+        )
+        customers_by_state.columns = ["state", "customer_count"]
+        customers_by_state.to_csv(config.GOLD_DIR / "gold_customers_by_state.csv", index=False)
+        print("  - gold_customers_by_state.csv")
+
+    # 3. Pedidos por mes (analise temporal)
+    if "order_purchase_timestamp" in df_orders.columns:
+        df_orders_temp = df_orders.copy()
+        df_orders_temp["order_purchase_timestamp"] = pd.to_datetime(
+            df_orders_temp["order_purchase_timestamp"]
+        )
+        df_orders_temp["year_month"] = df_orders_temp["order_purchase_timestamp"].dt.to_period("M")
+        orders_by_month = (
+            df_orders_temp.groupby("year_month")
+            .size()
+            .reset_index(name="order_count")
+        )
+        orders_by_month["year_month"] = orders_by_month["year_month"].astype(str)
+        orders_by_month.to_csv(config.GOLD_DIR / "gold_orders_by_month.csv", index=False)
+        print("  - gold_orders_by_month.csv")
+
+    # 4. Status dos pedidos
+    if "order_status" in df_orders.columns:
+        order_status_dist = (
+            df_orders["order_status"]
+            .value_counts()
+            .reset_index()
+        )
+        order_status_dist.columns = ["status", "count"]
+        order_status_dist.to_csv(config.GOLD_DIR / "gold_order_status_distribution.csv", index=False)
+        print("  - gold_order_status_distribution.csv")
+
+    # 5. Ticket medio por regiao
+    if not product_recommendation_stats.empty and "customer_region" in df_customers.columns:
+        fact_with_region = (
+            df_order_items[["order_id", "price"]]
+            .merge(df_orders[["order_id", "customer_id"]], on="order_id")
+            .merge(df_customers[["customer_id", "customer_region"]], on="customer_id")
+        )
+        avg_ticket_by_region = (
+            fact_with_region.groupby("customer_region")
+            .agg(
+                total_orders=("order_id", "nunique"),
+                total_revenue=("price", "sum"),
+            )
+        )
+        avg_ticket_by_region["avg_ticket"] = (
+            avg_ticket_by_region["total_revenue"] / avg_ticket_by_region["total_orders"]
+        ).round(2)
+        avg_ticket_by_region.to_csv(config.GOLD_DIR / "gold_avg_ticket_by_region.csv")
+        print("  - gold_avg_ticket_by_region.csv")
+
+    print("\nArquivos Gold gerados em:", config.GOLD_DIR)
 
     return products_by_category, customers_by_region, product_recommendation_stats

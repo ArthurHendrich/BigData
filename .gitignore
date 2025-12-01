@@ -153,13 +153,12 @@ coverage.xml
 # 5. DADOS - ARQUIVOS PROCESSADOS/TEMPORÁRIOS
 # ============================================
 
-# Arquivos processados (Silver/Gold) - NÃO versionar dados processados
-# OBS: Mantenha apenas dados Bronze (raw) no Git
-*_silver.csv
+# Arquivos Parquet (formato binário, pode ser regenerado)
 *_silver.parquet
-*_gold.csv
-gold_*.csv
 gold_*.parquet
+
+# NOTA: Os CSVs das camadas Silver e Gold são versionados
+# para demonstrar a arquitetura Medallion na AV2
 
 # Arquivos temporários de dados
 *.tmp

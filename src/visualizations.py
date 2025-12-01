@@ -137,34 +137,22 @@ def generate_all_visualizations(
 
     # ========== VISUALIZACOES ADICIONAIS ==========
 
-    # 6. Distribuicao de clientes por estado (top 10)
-    if "customer_state" in df_customers.columns:
-        plt.figure(figsize=(10, 6))
-        state_counts = df_customers["customer_state"].value_counts().head(10)
-        colors = sns.color_palette("viridis", len(state_counts))
-        plt.bar(state_counts.index, state_counts.values, color=colors)
-        plt.title("Top 10 estados por numero de clientes")
-        plt.xlabel("Estado")
-        plt.ylabel("Numero de clientes")
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        path = output_dir / "top10_states_by_customers.png"
-        plt.savefig(path)
-        plt.close()
-        figure_paths["top10_states_by_customers"] = path
-
-    # 7. Pedidos por mes (evolucao temporal)
+    # 6. Pedidos por mes (evolucao temporal) - corte em 2018-08
     if "order_purchase_timestamp" in df_orders.columns:
         df_orders_temp = df_orders.copy()
         df_orders_temp["order_purchase_timestamp"] = pd.to_datetime(
             df_orders_temp["order_purchase_timestamp"]
         )
+        # Filtrar ate 2018-08 (dados incompletos apos essa data)
+        df_orders_temp = df_orders_temp[
+            df_orders_temp["order_purchase_timestamp"] < "2018-09-01"
+        ]
         df_orders_temp["year_month"] = df_orders_temp["order_purchase_timestamp"].dt.to_period("M")
         orders_by_month = df_orders_temp.groupby("year_month").size()
 
         plt.figure(figsize=(12, 5))
-        plt.plot(orders_by_month.index.astype(str), orders_by_month.values, marker="o", linewidth=2)
-        plt.title("Evolucao mensal de pedidos")
+        plt.plot(orders_by_month.index.astype(str), orders_by_month.values, marker="o", linewidth=2, color="steelblue")
+        plt.title("Evolucao mensal de pedidos (2016-2018)")
         plt.xlabel("Mes/Ano")
         plt.ylabel("Quantidade de pedidos")
         plt.xticks(rotation=45)
@@ -175,19 +163,20 @@ def generate_all_visualizations(
         plt.close()
         figure_paths["orders_by_month"] = path
 
-    # 8. Status dos pedidos (pie chart)
+    # 7. Status dos pedidos (grafico de barras horizontal - mais legivel)
     if "order_status" in df_orders.columns:
-        plt.figure(figsize=(8, 8))
+        plt.figure(figsize=(10, 6))
         status_counts = df_orders["order_status"].value_counts()
         colors = sns.color_palette("Set2", len(status_counts))
-        plt.pie(
-            status_counts.values,
-            labels=status_counts.index,
-            autopct="%1.1f%%",
-            colors=colors,
-            startangle=90,
-        )
+        bars = plt.barh(status_counts.index, status_counts.values, color=colors)
         plt.title("Distribuicao de status dos pedidos")
+        plt.xlabel("Quantidade de pedidos")
+        plt.ylabel("Status")
+        # Adicionar valores nas barras
+        for bar, value in zip(bars, status_counts.values):
+            percentage = (value / status_counts.sum()) * 100
+            plt.text(value + 500, bar.get_y() + bar.get_height()/2, 
+                     f"{value:,} ({percentage:.1f}%)", va="center", fontsize=9)
         plt.tight_layout()
         path = output_dir / "order_status_distribution.png"
         plt.savefig(path)

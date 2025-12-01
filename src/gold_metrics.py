@@ -174,23 +174,16 @@ def build_gold_tables(
         revenue_by_category.to_csv(config.GOLD_DIR / "gold_revenue_by_category.csv")
         print("  - gold_revenue_by_category.csv")
 
-    # 2. Analise por estado
-    if "customer_state" in df_customers.columns:
-        customers_by_state = (
-            df_customers["customer_state"]
-            .value_counts()
-            .reset_index()
-        )
-        customers_by_state.columns = ["state", "customer_count"]
-        customers_by_state.to_csv(config.GOLD_DIR / "gold_customers_by_state.csv", index=False)
-        print("  - gold_customers_by_state.csv")
-
-    # 3. Pedidos por mes (analise temporal)
+    # 2. Pedidos por mes (analise temporal) - corte em 2018-08
     if "order_purchase_timestamp" in df_orders.columns:
         df_orders_temp = df_orders.copy()
         df_orders_temp["order_purchase_timestamp"] = pd.to_datetime(
             df_orders_temp["order_purchase_timestamp"]
         )
+        # Filtrar ate 2018-08 (dados incompletos apos essa data)
+        df_orders_temp = df_orders_temp[
+            df_orders_temp["order_purchase_timestamp"] < "2018-09-01"
+        ]
         df_orders_temp["year_month"] = df_orders_temp["order_purchase_timestamp"].dt.to_period("M")
         orders_by_month = (
             df_orders_temp.groupby("year_month")

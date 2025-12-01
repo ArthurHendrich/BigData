@@ -153,8 +153,6 @@ coverage.xml
 # 5. DADOS - ARQUIVOS PROCESSADOS/TEMPORÁRIOS
 # ============================================
 
-
-
 # NOTA: Os CSVs das camadas Silver e Gold são versionados
 # para demonstrar a arquitetura Medallion na AV2
 
